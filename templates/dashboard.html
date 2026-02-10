@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymPro | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white hero-bg">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-message" class="fixed top-5 right-5 z-50 flex flex-col gap-2">
+          {% for category, message in messages %}
+            <div class="{{ 'bg-green-600' if category == 'success' else 'bg-red-600' }} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+                <span class="text-xl">{{ '✅' if category == 'success' else '⚠️' }}</span>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+            setTimeout(() => {
+                const msg = document.getElementById('flash-message');
+                if(msg) {
+                    msg.style.transition = "opacity 0.5s ease";
+                    msg.style.opacity = "0";
+                    setTimeout(() => msg.remove(), 500);
+                }
+            }, 3000);
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <div class="flex h-screen">
+        <div class="w-64 bg-gray-800 p-5 flex flex-col shadow-2xl border-r border-gray-700">
+            <a href="/dashboard" class="text-2xl font-bold mb-10 tracking-tight">Gym<span class="text-indigo-500">Pro</span></a>
+            <nav class="flex flex-col space-y-2">
+                <a href="/dashboard" class="px-4 py-2 rounded bg-indigo-600 text-white shadow-md">Dashboard</a>
+                <a href="/plans" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Plans</a>
+                <a href="/members" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Members</a>
+                <a href="/classes" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Classes</a>
+                <a href="/trainers" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Trainers</a>
+                <a href="/billing" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Billing</a>
+            </nav>
+            <a href="/" class="mt-auto px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-center transition-colors">Logout</a>
+        </div>
+
+        <main class="flex-1 p-10 overflow-y-auto">
+            <h2 class="text-3xl font-bold mb-8 text-white">Dashboard Overview</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border-l-4 border-green-500 border-t border-r border-b border-gray-700">
+                    <p class="text-gray-400 text-sm font-medium">Total Revenue</p>
+                    <div class="flex justify-between items-end">
+                        <p class="text-3xl font-bold text-white mt-1">${{ revenue }}</p>
+                        <span class="text-2xl">💰</span>
+                    </div>
+                </div>
+                <div class="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border-l-4 border-blue-500 border-t border-r border-b border-gray-700">
+                    <p class="text-gray-400 text-sm font-medium">Active Members</p>
+                    <div class="flex justify-between items-end">
+                        <p class="text-3xl font-bold text-white mt-1">{{ active_members }}</p>
+                        <span class="text-2xl">👥</span>
+                    </div>
+                </div>
+                <div class="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border-l-4 border-indigo-500 border-t border-r border-b border-gray-700">
+                    <p class="text-gray-400 text-sm font-medium">Trainers</p>
+                    <div class="flex justify-between items-end">
+                        <p class="text-3xl font-bold text-white mt-1">{{ trainers }}</p>
+                        <span class="text-2xl">💪</span>
+                    </div>
+                </div>
+                <div class="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border-l-4 border-yellow-500 border-t border-r border-b border-gray-700">
+                    <p class="text-gray-400 text-sm font-medium">Pending Invoices</p>
+                    <div class="flex justify-between items-end">
+                        <p class="text-3xl font-bold text-white mt-1">{{ pending }}</p>
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                    <div class="p-5 border-b border-gray-700">
+                        <h3 class="text-xl font-bold text-white">Popular Classes</h3>
+                    </div>
+                    <table class="w-full text-sm text-left text-gray-300">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                            <tr>
+                                <th class="px-6 py-3">Class Name</th>
+                                <th class="px-6 py-3 text-right">Capacity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cls in classes %}
+                            <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4 font-medium text-white">{{ cls.class_name }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="bg-indigo-900/80 text-indigo-300 px-2 py-1 rounded text-xs font-bold border border-indigo-500/30">{{ cls.max_capacity }} Students</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="2" class="px-6 py-4 text-center text-gray-500">No classes found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                    <div class="p-5 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-red-400">Overdue Payments</h3>
+                        <a href="/billing" class="text-xs text-gray-400 hover:text-white transition-colors">View All</a>
+                    </div>
+                    <ul class="divide-y divide-gray-700">
+                        {% for invoice in overdue %}
+                        <li class="p-4 hover:bg-gray-700/50 transition flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">{{ invoice.full_name }}</p>
+                                <p class="text-xs text-gray-400">Due: {{ invoice.due_date }}</p>
+                            </div>
+                            <span class="text-red-400 font-bold">${{ invoice.amount }}</span>
+                        </li>
+                        {% else %}
+                        <li class="p-6 text-center text-gray-500">
+                            <p>No overdue invoices!</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-yellow-400">To-Do List</h3>
+                        <span class="text-xs text-white-400">Manager Tasks</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto max-h-64 p-2 space-y-2">
+                        {% for task in todos %}
+                        <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded hover:bg-gray-700 transition group">
+                            <span class="text-sm text-gray-200">{{ task.task }}</span>
+                            <a href="/todo/delete/{{ task.id }}" class="text-gray-500 hover:text-red-400 transition opacity-0 group-hover:opacity-100">🗑️</a>
+                        </div>
+                        {% else %}
+                        <p class="text-gray-500 text-center text-sm py-8">All tasks completed! 🎉</p>
+                        {% endfor %}
+                    </div>
+
+                    <form action="/todo/add" method="POST" class="p-4 border-t border-gray-700 flex gap-2">
+                        <input type="text" name="task" placeholder="Add new task..." required 
+                            class="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm font-bold shadow transition-colors">+</button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymPro | Trainers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white hero-bg">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-message" class="fixed top-5 right-5 z-50 flex flex-col gap-2">
+          {% for category, message in messages %}
+            <div class="{{ 'bg-green-600' if category == 'success' else 'bg-red-600' }} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+                <span class="text-xl">{{ '✅' if category == 'success' else '⚠️' }}</span>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+            setTimeout(() => {
+                const msg = document.getElementById('flash-message');
+                if(msg) {
+                    msg.style.transition = "opacity 0.5s ease";
+                    msg.style.opacity = "0";
+                    setTimeout(() => msg.remove(), 500);
+                }
+            }, 3000);
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <div class="flex h-screen">
+        <div class="w-64 bg-gray-800 p-5 flex flex-col shadow-2xl border-r border-gray-700">
+            <a href="/dashboard" class="text-2xl font-bold mb-10 tracking-tight">Gym<span class="text-indigo-500">Pro</span></a>
+            <nav class="flex flex-col space-y-2">
+                <a href="/dashboard" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Dashboard</a>
+                <a href="/plans" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Plans</a>
+                <a href="/members" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Members</a>
+                <a href="/classes" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Classes</a>
+                <a href="/trainers" class="px-4 py-2 rounded bg-indigo-600 text-white shadow-md">Trainers</a>
+                <a href="/billing" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Billing</a>
+            </nav>
+            <a href="/" class="mt-auto px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-center transition-colors">Logout</a>
+        </div>
+
+        <main class="flex-1 p-10 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">Our Trainers</h2>
+                <button onclick="document.getElementById('addTrainerModal').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium shadow-lg transition-all flex items-center gap-2">
+                    <span>+</span> Add Trainer
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for trainer in trainers %}
+                <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border border-gray-700 shadow-xl hover:bg-gray-800/90 transition-all flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                        {{ trainer.full_name[:2].upper() }}
+                    </div>
+                    <h3 class="text-xl font-bold text-white">{{ trainer.full_name }}</h3>
+                    <p class="text-indigo-400 text-sm font-medium uppercase tracking-wide mb-2">{{ trainer.specialization }}</p>
+                    <p class="text-gray-400 text-sm mb-6">{{ trainer.email }}</p>
+                    <div class="mt-auto pt-4 border-t border-gray-700 w-full flex justify-center gap-6">
+                        <button onclick="openEditModal('{{ trainer.id }}', '{{ trainer.full_name }}', '{{ trainer.specialization }}', '{{ trainer.email }}')" class="text-yellow-400 hover:text-yellow-300 transition-colors text-lg" title="Edit">✏️</button>
+                        <span class="text-gray-600">|</span>
+                        <a href="/trainers/delete/{{ trainer.id }}" class="text-red-400 hover:text-red-300 transition-colors text-lg" onclick="return confirm('Delete this trainer?')" title="Delete">🗑️</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-3 text-center py-10 text-gray-500">
+                    No trainers added yet. Click "Add Trainer" to start building your team.
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <div id="addTrainerModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Add New Trainer</h2>
+            <form action="/trainers/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Full Name</label>
+                    <input type="text" name="fullName" placeholder="e.g. Mike Tyson" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Specialization</label>
+                    <select name="specialization" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        <option>Weightlifting</option>
+                        <option>Cardio</option>
+                        <option>Yoga</option>
+                        <option>Crossfit</option>
+                        <option>Rehabilitation</option>
+                        <option>General Fitness</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Email</label>
+                    <input type="email" name="email" placeholder="mike@gympro.com" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('addTrainerModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Add Trainer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editTrainerModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Edit Trainer</h2>
+            <form action="/trainers/edit" method="POST" class="space-y-4">
+                <input type="hidden" name="trainerId" id="edit_id">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Full Name</label>
+                    <input type="text" name="fullName" id="edit_name" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Specialization</label>
+                    <select name="specialization" id="edit_spec" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        <option>Weightlifting</option>
+                        <option>Cardio</option>
+                        <option>Yoga</option>
+                        <option>Crossfit</option>
+                        <option>Rehabilitation</option>
+                        <option>General Fitness</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Email</label>
+                    <input type="email" name="email" id="edit_email" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('editTrainerModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, name, specialization, email) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_spec').value = specialization;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('editTrainerModal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

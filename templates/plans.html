@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymPro | Plans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        /* The Professional Gradient Background */
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white hero-bg">
+    <div class="flex h-screen">
+        
+        <div class="w-64 bg-gray-800 p-5 flex flex-col shadow-2xl border-r border-gray-700">
+            <a href="/dashboard" class="text-2xl font-bold mb-10 tracking-tight">Gym<span class="text-indigo-500">Pro</span></a>
+            <nav class="flex flex-col space-y-2">
+                <a href="/dashboard" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Dashboard</a>
+                <a href="/plans" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Plans</a>
+                <a href="/members" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Members</a>
+                <a href="/classes" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Classes</a>
+                <a href="/trainers" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Trainers</a>
+                <a href="/billing" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Billing</a>
+            </nav>
+            <a href="/" class="mt-auto px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-center transition-colors">Logout</a>
+        </div>
+
+        <main class="flex-1 p-10 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">Membership Plans</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div id="plan-1" onclick="selectPlan(1)" class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 p-6 flex flex-col cursor-pointer hover:bg-gray-700/50 transition-all">
+                    <h3 class="text-xl font-bold text-white">Day Pass</h3>
+                    <p class="text-sm text-gray-400 mt-2">Single day access.</p>
+                    <div class="my-6">
+                        <span class="text-3xl font-bold text-white">$15</span>
+                        <span class="text-gray-500 text-sm">/ day</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1 text-sm text-gray-300">
+                        <li>• Full Gym Access</li>
+                        <li>• Locker Access</li>
+                        <li class="text-gray-600">• No Classes</li>
+                    </ul>
+                    <button id="btn-1" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 rounded transition-colors shadow-md">Select</button>
+                </div>
+
+                <div id="plan-2" onclick="selectPlan(2)" class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border-2 border-indigo-600 p-6 flex flex-col cursor-pointer relative transition-all">
+                    <div class="absolute top-0 right-0 bg-indigo-600 text-[10px] uppercase font-bold px-2 py-1 text-white rounded-bl">Popular</div>
+                    <h3 class="text-xl font-bold text-indigo-400">Monthly</h3>
+                    <p class="text-sm text-gray-400 mt-2">Cancel anytime.</p>
+                    <div class="my-6">
+                        <span class="text-3xl font-bold text-white">$49</span>
+                        <span class="text-gray-500 text-sm">/ month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1 text-sm text-gray-300">
+                        <li>• Full Gym Access</li>
+                        <li>• Unlimited Classes</li>
+                        <li>• Sauna Access</li>
+                    </ul>
+                    <button id="btn-2" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition-colors shadow-md">Selected</button>
+                </div>
+
+                <div id="plan-3" onclick="selectPlan(3)" class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 p-6 flex flex-col cursor-pointer hover:bg-gray-700/50 transition-all">
+                    <h3 class="text-xl font-bold text-white">6 Months</h3>
+                    <p class="text-sm text-gray-400 mt-2">Save 15% upfront.</p>
+                    <div class="my-6">
+                        <span class="text-3xl font-bold text-white">$249</span>
+                        <span class="text-gray-500 text-sm">/ total</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1 text-sm text-gray-300">
+                        <li>• All Monthly Features</li>
+                        <li>• 1 Free PT Session</li>
+                        <li>• Nutrition Guide</li>
+                    </ul>
+                    <button id="btn-3" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 rounded transition-colors shadow-md">Select</button>
+                </div>
+
+                <div id="plan-4" onclick="selectPlan(4)" class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700 p-6 flex flex-col cursor-pointer hover:bg-gray-700/50 transition-all">
+                    <h3 class="text-xl font-bold text-white">Yearly</h3>
+                    <p class="text-sm text-gray-400 mt-2">Best value package.</p>
+                    <div class="my-6">
+                        <span class="text-3xl font-bold text-white">$450</span>
+                        <span class="text-gray-500 text-sm">/ year</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1 text-sm text-gray-300">
+                        <li>• All Access Pass</li>
+                        <li>• 3 Free PT Sessions</li>
+                        <li>• Unlimited Guest Passes</li>
+                    </ul>
+                    <button id="btn-4" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 rounded transition-colors shadow-md">Select</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function selectPlan(id) {
+            // Reset all cards
+            for (let i = 1; i <= 4; i++) {
+                const card = document.getElementById(`plan-${i}`);
+                const btn = document.getElementById(`btn-${i}`);
+                
+                // Reset card style to standard gray border
+                card.classList.remove('border-indigo-600', 'border-2');
+                card.classList.add('border-gray-700', 'border');
+                
+                // Reset button style
+                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+                btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+                btn.innerText = "Select";
+            }
+
+            // Highlight active card
+            const activeCard = document.getElementById(`plan-${id}`);
+            const activeBtn = document.getElementById(`btn-${id}`);
+
+            activeCard.classList.remove('border-gray-700', 'border');
+            activeCard.classList.add('border-indigo-600', 'border-2');
+
+            activeBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            activeBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+            activeBtn.innerText = "Selected";
+        }
+    </script>
+</body>
+</html>

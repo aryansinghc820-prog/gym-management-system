@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymPro | Classes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white hero-bg">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-message" class="fixed top-5 right-5 z-50 flex flex-col gap-2">
+          {% for category, message in messages %}
+            <div class="{{ 'bg-green-600' if category == 'success' else 'bg-red-600' }} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+                <span class="text-xl">{{ '✅' if category == 'success' else '⚠️' }}</span>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+            setTimeout(() => {
+                const msg = document.getElementById('flash-message');
+                if(msg) {
+                    msg.style.transition = "opacity 0.5s ease";
+                    msg.style.opacity = "0";
+                    setTimeout(() => msg.remove(), 500);
+                }
+            }, 3000);
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <div class="flex h-screen">
+        <div class="w-64 bg-gray-800 p-5 flex flex-col shadow-2xl border-r border-gray-700">
+            <a href="/dashboard" class="text-2xl font-bold mb-10 tracking-tight">Gym<span class="text-indigo-500">Pro</span></a>
+            <nav class="flex flex-col space-y-2">
+                <a href="/dashboard" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Dashboard</a>
+                <a href="/plans" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Plans</a>
+                <a href="/members" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Members</a>
+                <a href="/classes" class="px-4 py-2 rounded bg-indigo-600 text-white shadow-md">Classes</a>
+                <a href="/trainers" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Trainers</a>
+                <a href="/billing" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Billing</a>
+            </nav>
+            <a href="/" class="mt-auto px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-center transition-colors">Logout</a>
+        </div>
+
+        <main class="flex-1 p-10 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">Class Schedule</h2>
+                <button onclick="document.getElementById('addClassModal').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium shadow-lg transition-all flex items-center gap-2">
+                    <span>+</span> Add Class
+                </button>
+            </div>
+
+            <form action="/classes" method="get" class="mb-6">
+                <div class="relative">
+                    <input type="text" name="q" placeholder="Search classes or trainers..." 
+                        class="w-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors shadow-sm">
+                    <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-white">🔍</button>
+                </div>
+            </form>
+
+            <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+                <table class="w-full text-left text-gray-300">
+                    <thead class="bg-gray-700/50 text-gray-100 uppercase text-xs font-semibold tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">Class Name</th>
+                            <th class="px-6 py-4">Trainer</th>
+                            <th class="px-6 py-4">Day</th>
+                            <th class="px-6 py-4">Time</th>
+                            <th class="px-6 py-4 text-center">Capacity</th>
+                            <th class="px-6 py-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for cls in classes %}
+                        <tr class="hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white">{{ cls.class_name }}</td>
+                            <td class="px-6 py-4 flex items-center gap-2">
+                                <span class="bg-indigo-900/50 text-indigo-300 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold">
+                                    {{ cls.trainer_name[:1] }}
+                                </span>
+                                {{ cls.trainer_name }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">{{ cls.schedule_day }}</td>
+                            <td class="px-6 py-4 font-medium text-white">{{ cls.schedule_time }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-gray-700 border border-gray-600 px-3 py-1 rounded text-xs text-white">
+                                    Max: {{ cls.max_capacity }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center flex justify-center gap-4">
+                                <button onclick="openEditModal('{{ cls.id }}', '{{ cls.class_name }}', '{{ cls.trainer_id }}', '{{ cls.schedule_day }}', '{{ cls.schedule_time }}', '{{ cls.max_capacity }}')" class="text-yellow-400 hover:text-yellow-300 transition-colors">✏️</button>
+                                <a href="/classes/delete/{{ cls.id }}" class="text-red-400 hover:text-red-300 transition-colors" onclick="return confirm('Delete this class?')">🗑️</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-gray-500">No classes scheduled yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addClassModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Schedule New Class</h2>
+            <form action="/classes/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Class Name</label>
+                    <input type="text" name="className" placeholder="e.g. Yoga Flow" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Trainer</label>
+                    <select name="trainerId" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        {% for trainer in trainers %}
+                            <option value="{{ trainer.id }}">{{ trainer.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">Day</label>
+                        <select name="scheduleDay" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">Time</label>
+                        <input type="time" name="scheduleTime" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Capacity</label>
+                    <input type="number" name="maxCapacity" placeholder="20" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('addClassModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Create Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editClassModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Edit Class</h2>
+            <form action="/classes/edit" method="POST" class="space-y-4">
+                <input type="hidden" name="class_id" id="edit_id">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Class Name</label>
+                    <input type="text" name="className" id="edit_name" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Trainer</label>
+                    <select name="trainerId" id="edit_trainer" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        {% for trainer in trainers %}
+                            <option value="{{ trainer.id }}">{{ trainer.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">Day</label>
+                        <select name="scheduleDay" id="edit_day" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">Time</label>
+                        <input type="text" name="scheduleTime" id="edit_time" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Capacity</label>
+                    <input type="number" name="maxCapacity" id="edit_capacity" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('editClassModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, name, trainerId, day, time, capacity) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_trainer').value = trainerId;
+            document.getElementById('edit_day').value = day;
+            document.getElementById('edit_time').value = time;
+            document.getElementById('edit_capacity').value = capacity;
+            document.getElementById('editClassModal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

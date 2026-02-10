@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymPro | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 hero-bg min-h-screen flex items-center justify-center px-4">
+
+    <div class="max-w-md w-full space-y-8 bg-gray-800 p-10 rounded-2xl shadow-2xl border border-gray-700">
+        
+        <div class="text-center">
+            <div class="flex justify-center mb-6">
+                 <h1 class="text-4xl font-bold tracking-tight text-white">
+                    Gym<span class="text-indigo-500">Pro</span>
+                </h1>
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight text-white">
+                Create Account
+            </h2>
+            <p class="mt-2 text-sm text-gray-400">
+                Join the GymPro management team
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" action="/register" method="POST">
+            <div class="space-y-4 rounded-md shadow-sm">
+                
+                <div>
+                    <label for="fullname" class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
+                    <input id="fullname" name="full_name" type="text" required 
+                        class="relative block w-full appearance-none rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-white placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" 
+                        placeholder="John Doe">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-400 mb-1">Email address</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required 
+                        class="relative block w-full appearance-none rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-white placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" 
+                        placeholder="admin@gympro.com">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required 
+                        class="relative block w-full appearance-none rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-white placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" 
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative flex w-full justify-center rounded-lg bg-indigo-600 py-2.5 px-4 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                    Sign Up
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center text-sm">
+            <p class="text-gray-400">
+                Already have an account?
+                <a href="/login" class="font-medium text-indigo-400 hover:text-indigo-300 hover:underline transition-all">
+                    Sign in instead
+                </a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

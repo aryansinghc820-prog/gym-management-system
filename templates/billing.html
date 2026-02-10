@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymPro | Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        .hero-bg {
+            background-color: #111827;
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white hero-bg">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-message" class="fixed top-5 right-5 z-50 flex flex-col gap-2">
+          {% for category, message in messages %}
+            <div class="{{ 'bg-green-600' if category == 'success' else 'bg-red-600' }} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+                <span class="text-xl">{{ '✅' if category == 'success' else '⚠️' }}</span>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+            setTimeout(() => {
+                const msg = document.getElementById('flash-message');
+                if(msg) {
+                    msg.style.transition = "opacity 0.5s ease";
+                    msg.style.opacity = "0";
+                    setTimeout(() => msg.remove(), 500);
+                }
+            }, 3000);
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <div class="flex h-screen">
+        <div class="w-64 bg-gray-800 p-5 flex flex-col shadow-2xl border-r border-gray-700">
+            <a href="/dashboard" class="text-2xl font-bold mb-10 tracking-tight">Gym<span class="text-indigo-500">Pro</span></a>
+            <nav class="flex flex-col space-y-2">
+                <a href="/dashboard" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Dashboard</a>
+                <a href="/plans" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Plans</a>
+                <a href="/members" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Members</a>
+                <a href="/classes" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Classes</a>
+                <a href="/trainers" class="px-4 py-2 rounded hover:bg-gray-700 transition-colors">Trainers</a>
+                <a href="/billing" class="px-4 py-2 rounded bg-indigo-600 text-white shadow-md">Billing</a>
+            </nav>
+            <a href="/" class="mt-auto px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-center transition-colors">Logout</a>
+        </div>
+
+        <main class="flex-1 p-10 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">Billing & Invoices</h2>
+                <button onclick="document.getElementById('addInvoiceModal').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium shadow-lg transition-all flex items-center gap-2">
+                    <span>+</span> Create Invoice
+                </button>
+            </div>
+
+            <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+                <table class="w-full text-left text-gray-300">
+                    <thead class="bg-gray-700/50 text-gray-100 uppercase text-xs font-semibold tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">Member Name</th>
+                            <th class="px-6 py-4">Amount</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Due Date</th>
+                            <th class="px-6 py-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for record in billing_records %}
+                        <tr class="hover:bg-gray-700/50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-white">{{ record.full_name }}</td>
+                            <td class="px-6 py-4 text-white font-bold">${{ record.amount }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 text-xs font-bold rounded-full border 
+                                    {% if record.status == 'Paid' %} bg-green-900/50 text-green-300 border-green-500/30
+                                    {% elif record.status == 'Overdue' %} bg-red-900/50 text-red-300 border-red-500/30
+                                    {% else %} bg-yellow-900/50 text-yellow-300 border-yellow-500/30 {% endif %}">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">{{ record.due_date }}</td>
+                            <td class="px-6 py-4 text-center flex justify-center gap-4">
+                                {% if record.status != 'Paid' %}
+                                <a href="/billing/pay/{{ record.id }}" class="text-green-400 hover:text-green-300 transition-colors text-lg" title="Mark as Paid">✅</a>
+                                {% else %}
+                                <span class="text-gray-600 text-lg cursor-not-allowed">✅</span>
+                                {% endif %}
+                                <span class="text-gray-600">|</span>
+                                <button onclick="openEditModal('{{ record.id }}', '{{ record.amount }}', '{{ record.status }}', '{{ record.due_date }}')" class="text-yellow-400 hover:text-yellow-300 transition-colors text-lg" title="Edit Invoice">✏️</button>
+                                <span class="text-gray-600">|</span>
+                                <a href="/billing/delete/{{ record.id }}" class="text-red-400 hover:text-red-300 transition-colors text-lg" onclick="return confirm('Delete this invoice?')" title="Delete Invoice">🗑️</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">No invoices found. Create one above!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addInvoiceModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Create New Invoice</h2>
+            <form action="/billing/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Member</label>
+                    <select name="member_id" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        {% for member in members %}
+                            <option value="{{ member.id }}">{{ member.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Amount ($)</label>
+                    <input type="number" name="amount" placeholder="49.00" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Duration (Months)</label>
+                    <input type="number" name="duration" placeholder="1" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Due Date</label>
+                    <input type="date" name="due_date" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Status</label>
+                    <select name="status" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Overdue">Overdue</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('addInvoiceModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Create Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editInvoiceModal" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl w-96 border border-gray-700 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white">Edit Invoice</h2>
+            <form action="/billing/edit" method="POST" class="space-y-4">
+                <input type="hidden" name="invoice_id" id="edit_id">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Amount ($)</label>
+                    <input type="number" name="amount" id="edit_amount" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Status</label>
+                    <select name="status" id="edit_status" class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Overdue">Overdue</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase font-bold">Due Date</label>
+                    <input type="date" name="due_date" id="edit_date" required class="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-indigo-500 outline-none mt-1">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('editInvoiceModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium shadow-md transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, amount, status, date) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_amount').value = amount;
+            document.getElementById('edit_status').value = status;
+            document.getElementById('edit_date').value = date;
+            document.getElementById('editInvoiceModal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
